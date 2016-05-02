@@ -214,7 +214,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
         }
         else if (playing) {
 
-            /*draw "goal lines" on each side
+            /* draw "goal lines" on each side
             g.drawLine(playerOneRight, 0, playerOneRight, getHeight());
             g.drawLine(playerTwoLeft, 0, playerTwoLeft, getHeight());*/
 
