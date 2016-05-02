@@ -11,6 +11,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+// we probably should refactor it, so that we have controller and model separated
 
 @SuppressWarnings("serial")
 public class Control extends JPanel implements ActionListener, KeyListener{
