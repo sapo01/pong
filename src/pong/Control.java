@@ -194,7 +194,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
         repaint();
     } 
     
-	//paint the game screen
+	//paint the game screen -> move in a separate class
     public void paintComponent(Graphics g){
 
         super.paintComponent(g);
