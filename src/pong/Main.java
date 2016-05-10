@@ -9,6 +9,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+/*
+ * @author Janick Ruegger
+ * @author Sandro Portner
+ * @version 1.0
+ * 
+ */
+
 public class Main{
 
     public static void main(String[] args) {
@@ -20,14 +27,18 @@ public class Main{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setIconImage(new ImageIcon("./src/img/icon.png").getImage());
         frame.setLayout(new BorderLayout());
-
-        Control pongGame = new Control();
-        pongGame.setOpaque(false);
         
-        frame.add(pongGame, BorderLayout.CENTER);
+        View view = new View();
+        
+        view.setOpaque(false);
+        
+        frame.add(view, BorderLayout.CENTER);
+        
+      
         
         frame.setSize(500, 500);
         frame.setVisible(true);

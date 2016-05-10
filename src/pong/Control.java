@@ -1,8 +1,6 @@
 package pong;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -11,8 +9,6 @@ import java.awt.event.KeyListener;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-// we probably should refactor it, so that we have controller and model separated
-// ESC KEY DOESNT WORK CORRET ! FIX
 @SuppressWarnings("serial")
 public class Control extends JPanel implements ActionListener, KeyListener{
 
@@ -23,42 +19,43 @@ public class Control extends JPanel implements ActionListener, KeyListener{
     Paddle playerTwo = new Paddle(495,465,250,10,50);
     
     
-	private boolean showTitleScreen = true;
-	private boolean optionsScreen = false;
-    private boolean playing = false;
-    private boolean gameOver = false;
+    protected boolean showTitleScreen = true;
+	protected boolean optionsScreen = false;
+    protected boolean playing = false;
+    protected boolean gameOver = false;
     
     private boolean upPressed = false;
     private boolean downPressed = false;
     private boolean wPressed = false;
     private boolean sPressed = false;
     
-    //for free mode
-    private boolean freeMode = false;
+    //more keys for the free mode
+    protected boolean freeMode = false;
     private boolean leftPressed = false;
     private boolean rightPressed = false;
     private boolean aPressed = false;
     private boolean dPressed = false;
 
-    private int playerOneScore = 0;
-    private int playerTwoScore = 0;
+    protected int playerOneScore = 0;
+    protected int playerTwoScore = 0;
     
     public Control(){
     	
-        //listen to key presses
+        //listen to key presses in this panel
         setFocusable(true);
         addKeyListener(this);
 
-        //call step() -> speed of the game
-        Timer timer = new Timer(1000/90, this);
+        //call step() -> game speed
+        Timer timer = new Timer(1000/80, this);
         timer.start();
     }
-
-
+    
+    //ActionEvent
     public void actionPerformed(ActionEvent e){
         step();
     }
-
+    
+    //main logic method (player and ball movements)
     public void step(){
 
         if(playing){        	
@@ -66,7 +63,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
         	int playerTwoSpeed = playerTwo.getSpeed();
         	int frameHeight = getHeight();
         	
-            //PlayerKeyPressCheck
+            //checks if and which key is pressed
             if (wPressed) {
             	if (playerOne.getY()-playerOneSpeed > 0) {    
                     playerOne.setY(playerOne.getY()-playerOneSpeed);
@@ -88,7 +85,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
                 }
             }
             
-            //add left right for free mode
+            //add left right keys for free mode
             if(freeMode){
             if (aPressed) {
             	if (playerOne.getX()-playerOneSpeed > 5) {    
@@ -111,157 +108,105 @@ public class Control extends JPanel implements ActionListener, KeyListener{
                 }
             }
             }
-        	
-          
-            //BallMovements
-            int nextBallLeft = ball.getBallX() + ball.getDeltaX();
-            int nextBallRight = ball.getBallX() + ball.getDiameter() + ball.getDeltaX();
-            
-            int nextBallTop = ball.getBallY() + ball.getDeltaY();
-            int nextBallBottom = ball.getBallY() + ball.getDiameter() + ball.getDeltaY();
-                      
-
-            final int playerOneLine = playerOne.getScoreLine();
-            int playerOneTop = playerOne.getY();
-            int playerOneBottom = playerOne.getY()+ playerOne.getSizeH();
-
-            final int playerTwoLine = playerTwo.getScoreLine();
-            int playerTwoTop = playerTwo.getY();
-            int playerTwoBottom = playerTwo.getY() + playerTwo.getSizeH();
-
-
-            //ball bounces off top and bottom of screen
-            if (nextBallTop < 0 || nextBallBottom > getHeight()) {
-                ball.setDeltaY(ball.getDeltaY() * -1);
+            //the method for the ball movements
+            ballLogic();
+             
             }
-
-            //will the ball go off the left side?
-            if (nextBallLeft < playerOneLine) { 
-                //is it going to miss the paddle?
-                if (nextBallTop > playerOneBottom || nextBallBottom < playerOneTop) {
-
-                    playerTwoScore ++;
-
-                    if (playerTwoScore == 3) {
-                        playing = false;
-                        gameOver = true;
-                    }
-                    ball.setDeltaX(-3);
-                    ball.setBallX(250);
-                    ball.setBallY(250);
-                }
-                else if(playerOne.getX()<ball.getBallX()){
-                	ball.setDeltaX(Math.abs(ball.getDeltaX()));
-                }
-            }else if(nextBallLeft < playerOne.getX()+playerOne.getSizeW()){
-            	if (!(nextBallTop > playerOneBottom || nextBallBottom < playerOneTop)) {
-            		if(ball.getBallX()>playerOne.getX()){
-            	    ball.setDeltaX(Math.abs(ball.getDeltaX()));
-            		}
-            	}
-            }
-                //will the ball go off the right side?
-                if (nextBallRight > playerTwoLine) {
-                    //is it going to miss the paddle?
-                    if (nextBallTop > playerTwoBottom || nextBallBottom < playerTwoTop) {
-
-                        playerOneScore ++;
-                        
-                        if (playerOneScore == 3) {
-                            playing = false;
-                            gameOver = true;
-                        }
-                        ball.setDeltaX(3);
-                        ball.setBallX(250);
-                        ball.setBallY(250);
-                    }
-                    else if(playerTwo.getX()>ball.getBallX()){
-                        ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
-                        //Change here to FIX the panel Problems in FreeMode -> Create two PlayerBallDeltas to change on Panel touch
-                    }
-                }else if(nextBallRight > playerTwo.getX()){
-                	if (!(nextBallTop > playerTwoBottom || nextBallBottom < playerTwoTop)) {
-                		if(ball.getBallX()<playerTwo.getX()){
-                	    ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
-                		}
-                	}
-                }
-
-                //move the ball
-                ball.setBallX(ball.getBallX() + ball.getDeltaX());
-                ball.setBallY(ball.getBallY() + ball.getDeltaY());
-            }
-        //stuff has moved, tell this JPanel to repaint itself
+        //tell this JPanel to repaint itself
         repaint();
     } 
     
-	//paint the game screen -> move in a separate class
-    public void paintComponent(Graphics g){
+    //outsourced ball logic
+    private void ballLogic(){
+    	
+    	//ball movements
+        int nextBallLeft = ball.getBallX() + ball.getDeltaX();
+        int nextBallRight = ball.getBallX() + ball.getDiameter() + ball.getDeltaX();
+        
+        int nextBallTop = ball.getBallY() + ball.getDeltaY();
+        int nextBallBottom = ball.getBallY() + ball.getDiameter() + ball.getDeltaY();
+        
+        //position of the players/paddles
+        final int playerOneLine = playerOne.getScoreLine();
+        int playerOneTop = playerOne.getY();
+        int playerOneBottom = playerOne.getY()+ playerOne.getSizeH();
 
-        super.paintComponent(g);
-        g.setColor(Color.WHITE);
+        final int playerTwoLine = playerTwo.getScoreLine();
+        int playerTwoTop = playerTwo.getY();
+        int playerTwoBottom = playerTwo.getY() + playerTwo.getSizeH();
+        
+        //ball bounces off top and bottom of screen
+        if (nextBallTop < 0 || nextBallBottom > getHeight()) {
+            ball.setDeltaY(ball.getDeltaY() * -1);
+        }
 
-        if (showTitleScreen) {
+        //checks if the ball goes off the left side
+        if (nextBallLeft < playerOneLine) { 
+            //hit the paddle or not ?
+            if (nextBallTop > playerOneBottom || nextBallBottom < playerOneTop) {
 
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 36));
-            g.drawString("Pong", 165, 100);
+                playerTwoScore ++;
+
+                if (playerTwoScore == 3) {
+                    playing = false;
+                    gameOver = true;
+                }
+                //reset the ball (service)
+                ball.setDeltaX(-3);
+                ball.setBallX(250);
+                ball.setBallY(250);
+            }
             
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 18));
-            g.drawString("Start: Press Enter", 175, 400);
-            g.drawString("Options: Press O", 175, 350);
-            if(freeMode){
-            	g.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
-            	g.drawString("free mode enabled", 175, 420);
+            //ball hits the paddle -> change the direction
+            else if(playerOne.getX()<ball.getBallX()){
+            	ball.setDeltaX(Math.abs(ball.getDeltaX()));
             }
         }
-        else if (playing) {
-
-            /* draw "goal lines" on each side
-            g.drawLine(playerOneRight, 0, playerOneRight, getHeight());
-            g.drawLine(playerTwoLeft, 0, playerTwoLeft, getHeight());*/
-
-            //draw the scores
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 22));
-            g.drawString(String.valueOf(playerOneScore), 100, 100);
-            g.drawString(String.valueOf(playerTwoScore), 400, 100);
-
-            //draw the ball
-            //g.fillOval(ballX, ballY, diameter, diameter);
-            g.drawImage(ball.getImg(), ball.getBallX(), ball.getBallY(), null);
-            
-            //draw the paddles
-            g.fillRect(playerOne.getX(), playerOne.getY(), playerOne.getSizeW(), playerOne.getSizeH());
-            g.fillRect(playerTwo.getX(), playerTwo.getY(), playerTwo.getSizeW(), playerTwo.getSizeH());
-            
-            //draw the info
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 12));
-            g.drawString("ESC for Exit", 1, 10);
-        }else if (optionsScreen) {
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
-            g.drawString("Press F for Free Mode", 100, 100);
-            g.drawString("Back to Startscreen: SPACE", 100, 125);
+        //for the free mode -> if the ball hits the paddle
+        else if(nextBallLeft < playerOne.getX()+playerOne.getSizeW()){
+        	if (!(nextBallTop > playerOneBottom || nextBallBottom < playerOneTop)) {
+        		if(ball.getBallX()>playerOne.getX()){
+        	    ball.setDeltaX(Math.abs(ball.getDeltaX()));
+        		}
+        	}
         }
-        else if (gameOver) {
+            //checks if the ball goes off the right side
+            if (nextBallRight > playerTwoLine) {
+            	//hit the paddle or not ?
+                if (nextBallTop > playerTwoBottom || nextBallBottom < playerTwoTop) {
 
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 25));
-            g.drawString(String.valueOf(playerOneScore), 100, 100);
-            g.drawString(String.valueOf(playerTwoScore), 400, 100);
-
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 36));
-            if (playerOneScore > playerTwoScore) {
-                g.drawString("Player 1 Wins!", 165, 200);
+                    playerOneScore ++;
+                    
+                    if (playerOneScore == 3) {
+                        playing = false;
+                        gameOver = true;
+                    }
+                    //ball reset (service)
+                    ball.setDeltaX(3);
+                    ball.setBallX(250);
+                    ball.setBallY(250);
+                }
+                //ball hits the paddle -> change the direction
+                else if(playerTwo.getX()>ball.getBallX()){
+                    ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
+                }
             }
-            else {
-                g.drawString("Player 2 Wins!", 165, 200);
+            //for the free mode -> if the ball hits the paddle
+            else if(nextBallRight > playerTwo.getX()){
+            	if (!(nextBallTop > playerTwoBottom || nextBallBottom < playerTwoTop)) {
+            		if(ball.getBallX()<playerTwo.getX()){
+            	    ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
+            		}
+            	}
             }
-
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 18));
-            g.drawString("Press space to restart.", 150, 400);
-        }
+            
+        //ball movement
+        ball.setBallX(ball.getBallX() + ball.getDeltaX());
+        ball.setBallY(ball.getBallY() + ball.getDeltaY());
     }
     
     
-//  Keyevents
+    //key event listener
     public void keyTyped(KeyEvent e) {}
 
     public void keyPressed(KeyEvent e) {
@@ -275,6 +220,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
                 optionsScreen = true;
             }
         }
+        //listen to the playing keys
         else if(playing){
         	     	
         	switch(e.getKeyCode()) {
@@ -286,37 +232,39 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             case KeyEvent.VK_S: sPressed = true; break;
             case KeyEvent.VK_A: aPressed = true; break;
             case KeyEvent.VK_D: dPressed = true; break;
-            case KeyEvent.VK_ESCAPE: showTitleScreen = true;
-									 reset();
-									 break;
+            //exit the game and reset the stats
+            case KeyEvent.VK_ESCAPE: showTitleScreen = true; playing=false; reset(); break;
             }
         	
         }
+        //exception for option screen
         else if (optionsScreen) {
             if (e.getKeyCode() == KeyEvent.VK_F) {
             	if(freeMode){
             	freeMode = false;
-            	}else{freeMode = true;}
+            	}
+            	else{freeMode = true;}
             	
                 showTitleScreen = true;
                 optionsScreen = false;
-            }else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            }
+            else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 showTitleScreen = true;
             }
-        }else if (gameOver) {
+        }
+        //exception for game over screen
+        else if (gameOver) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             	reset();
                 gameOver = false;
                 showTitleScreen = true;
-                
             }
         }
     }
 
-
+    //key releases
     public void keyReleased(KeyEvent e) {
         if (playing) {
-        	      
         	switch(e.getKeyCode()) {
             case KeyEvent.VK_UP: upPressed = false; break;
             case KeyEvent.VK_DOWN: downPressed = false; break;
@@ -330,17 +278,21 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             
         }
     }
+    //recreate game for a new session
     public void reset(){
-    //recreate game
+ 
     this.ball = new Ball();
     this.playerOne = new Paddle(5,25,250,10,50);
     this.playerTwo = new Paddle(495,465,250,10,50);
+    
     playerOneScore = 0;
     playerTwoScore = 0;
+    
     upPressed = false;
     downPressed = false;
     leftPressed = false;
     rightPressed = false;
+    
     wPressed = false;
     sPressed = false;
     aPressed = false;

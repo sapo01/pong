@@ -1,14 +1,16 @@
 package pong;
 
 public class Paddle {
+	//fields for the paddle
 	private int scoreLine;
 	private int paddleX;
     private int paddleY;
     private int pSizeW;
     private int pSizeH;
     
+    //changeable paddle speed
     private int paddleSpeed = 6;
-     
+    
     public Paddle(int scoreLine, int paddleX, int paddleY, int pSizeW, int pSizeH) {
     	this.scoreLine = scoreLine;
 		this.paddleX = paddleX;
@@ -17,6 +19,7 @@ public class Paddle {
 		this.pSizeH = pSizeH;
 	}    
     
+    //getters and setters
 	public int getX() {
 		return paddleX;
 	}

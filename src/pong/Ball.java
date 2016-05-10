@@ -12,6 +12,7 @@ public class Ball {
     private int ballDeltaX = -2;
     private int ballDeltaY = 3;
     private Image img = new ImageIcon("./src/img/ball.png").getImage();
+    
     //constructor for default values
     public Ball (){}
     
@@ -23,6 +24,7 @@ public class Ball {
     	this.ballDeltaY = deltaY;
     }
     
+    //getters and setters
     public int getBallX() {
 		return ballX;
 	}
