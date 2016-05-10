@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 // we probably should refactor it, so that we have controller and model separated
-
+// ESC KEY DOESNT WORK CORRET ! FIX
 @SuppressWarnings("serial")
 public class Control extends JPanel implements ActionListener, KeyListener{
 
@@ -27,14 +27,14 @@ public class Control extends JPanel implements ActionListener, KeyListener{
 	private boolean optionsScreen = false;
     private boolean playing = false;
     private boolean gameOver = false;
-
+    
     private boolean upPressed = false;
     private boolean downPressed = false;
     private boolean wPressed = false;
     private boolean sPressed = false;
     
     //for free mode
-    private boolean freeMode = true;
+    private boolean freeMode = false;
     private boolean leftPressed = false;
     private boolean rightPressed = false;
     private boolean aPressed = false;
@@ -151,12 +151,12 @@ public class Control extends JPanel implements ActionListener, KeyListener{
                     ball.setBallY(250);
                 }
                 else if(playerOne.getX()<ball.getBallX()){
-                	ball.setDeltaX(ball.getDeltaX() * -1);
+                	ball.setDeltaX(Math.abs(ball.getDeltaX()));
                 }
             }else if(nextBallLeft < playerOne.getX()+playerOne.getSizeW()){
             	if (!(nextBallTop > playerOneBottom || nextBallBottom < playerOneTop)) {
             		if(ball.getBallX()>playerOne.getX()){
-            	    ball.setDeltaX(ball.getDeltaX() * -1);
+            	    ball.setDeltaX(Math.abs(ball.getDeltaX()));
             		}
             	}
             }
@@ -176,12 +176,13 @@ public class Control extends JPanel implements ActionListener, KeyListener{
                         ball.setBallY(250);
                     }
                     else if(playerTwo.getX()>ball.getBallX()){
-                        ball.setDeltaX(ball.getDeltaX() * -1);
+                        ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
+                        //Change here to FIX the panel Problems in FreeMode -> Create two PlayerBallDeltas to change on Panel touch
                     }
                 }else if(nextBallRight > playerTwo.getX()){
                 	if (!(nextBallTop > playerTwoBottom || nextBallBottom < playerTwoTop)) {
                 		if(ball.getBallX()<playerTwo.getX()){
-                	    ball.setDeltaX(ball.getDeltaX() * -1);
+                	    ball.setDeltaX(Math.abs(ball.getDeltaX()) * -1);
                 		}
                 	}
                 }
@@ -209,6 +210,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             g.drawString("Start: Press Enter", 175, 400);
             g.drawString("Options: Press O", 175, 350);
             if(freeMode){
+            	g.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
             	g.drawString("free mode enabled", 175, 420);
             }
         }
@@ -219,7 +221,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             g.drawLine(playerTwoLeft, 0, playerTwoLeft, getHeight());*/
 
             //draw the scores
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 25));
+            g.setFont(new Font(Font.DIALOG, Font.BOLD, 22));
             g.drawString(String.valueOf(playerOneScore), 100, 100);
             g.drawString(String.valueOf(playerTwoScore), 400, 100);
 
@@ -231,8 +233,11 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             g.fillRect(playerOne.getX(), playerOne.getY(), playerOne.getSizeW(), playerOne.getSizeH());
             g.fillRect(playerTwo.getX(), playerTwo.getY(), playerTwo.getSizeW(), playerTwo.getSizeH());
             
+            //draw the info
+            g.setFont(new Font(Font.DIALOG, Font.BOLD, 12));
+            g.drawString("ESC for Exit", 1, 10);
         }else if (optionsScreen) {
-            g.setFont(new Font(Font.DIALOG, Font.BOLD, 25));
+            g.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
             g.drawString("Press F for Free Mode", 100, 100);
             g.drawString("Back to Startscreen: SPACE", 100, 125);
         }
@@ -256,7 +261,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
     }
     
     
-//    Controller
+//  Keyevents
     public void keyTyped(KeyEvent e) {}
 
     public void keyPressed(KeyEvent e) {
@@ -271,39 +276,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             }
         }
         else if(playing){
-        	
-        	/* We tried to use switch and got it working,
-        	 * but we still keep the if-statements, just in case
-        	 */ 
-        	
-        	
-        	/*
-            if (e.getKeyCode() == KeyEvent.VK_UP) {
-                upPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                downPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                leftPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                rightPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_W) {
-                wPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_S) {
-                sPressed = true;
-            }else if (e.getKeyCode() == KeyEvent.VK_A) {
-                aPressed = true;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_D) {
-                dPressed = true;
-            }
-            */
-        	
-        	
+        	     	
         	switch(e.getKeyCode()) {
             case KeyEvent.VK_UP: upPressed = true; break;
             case KeyEvent.VK_DOWN: downPressed = true; break;
@@ -313,6 +286,9 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             case KeyEvent.VK_S: sPressed = true; break;
             case KeyEvent.VK_A: aPressed = true; break;
             case KeyEvent.VK_D: dPressed = true; break;
+            case KeyEvent.VK_ESCAPE: showTitleScreen = true;
+									 reset();
+									 break;
             }
         	
         }
@@ -329,14 +305,9 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             }
         }else if (gameOver) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            	reset();
                 gameOver = false;
                 showTitleScreen = true;
-                playerOneScore = 0;
-                playerTwoScore = 0;
-                //recreate game
-                this.ball = new Ball();
-                this.playerOne = new Paddle(5,25,250,10,50);
-                this.playerTwo = new Paddle(495,465,250,10,50);
                 
             }
         }
@@ -345,39 +316,7 @@ public class Control extends JPanel implements ActionListener, KeyListener{
 
     public void keyReleased(KeyEvent e) {
         if (playing) {
-        	
-        	/* We tried to use switch and got it working,
-        	 * but we still keep the if-statements, just in case
-        	 */ 
-        	
-        	
-        	/*
-        	if (e.getKeyCode() == KeyEvent.VK_UP) {
-                upPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                downPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                leftPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                rightPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_W) {
-                wPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_S) {
-                sPressed = false;
-            }else if (e.getKeyCode() == KeyEvent.VK_A) {
-                aPressed = false;
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_D) {
-                dPressed = false;
-            }
-        	*/
-        	
-        
+        	      
         	switch(e.getKeyCode()) {
             case KeyEvent.VK_UP: upPressed = false; break;
             case KeyEvent.VK_DOWN: downPressed = false; break;
@@ -390,5 +329,21 @@ public class Control extends JPanel implements ActionListener, KeyListener{
             }
             
         }
+    }
+    public void reset(){
+    //recreate game
+    this.ball = new Ball();
+    this.playerOne = new Paddle(5,25,250,10,50);
+    this.playerTwo = new Paddle(495,465,250,10,50);
+    playerOneScore = 0;
+    playerTwoScore = 0;
+    upPressed = false;
+    downPressed = false;
+    leftPressed = false;
+    rightPressed = false;
+    wPressed = false;
+    sPressed = false;
+    aPressed = false;
+    dPressed = false;
     }
 }
